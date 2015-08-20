@@ -1,0 +1,19 @@
+{
+  "name": "vottu",
+  "version": "0.0.1",
+  "description": "A plugable interface for generating RESTful API's from Mongoose models",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bajix/vottu.git"
+  },
+  "author": "Thomas Sieverding (Thomas@bajix.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bajix/vottu/issues"
+  },
+  "homepage": "https://github.com/Bajix/vottu#readme"
+}
