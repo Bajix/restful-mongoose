@@ -4,6 +4,7 @@
   "description": "A plugable interface for generating RESTful API's from Mongoose models",
   "main": "index.js",
   "scripts": {
+    "install": "node ./link",
     "test": "./node_modules/.bin/mocha"
   },
   "repository": {
