@@ -391,12 +391,16 @@ describe('Resource', function() {
       it('document should destroy', function( done ) {
         var destroy = new Vottu('User').destroy();
 
+        destroy.pre('query', function() {
+          this.query.select('+updatedAt +createdAt +role');
+        });
+
         this.app.delete('/users/:id.:format?', destroy.exec());
         this.app.use(errorHandler);
 
         this.agent.delete('/users/' + user._id)
           .expect('Content-Type', /json/)
-          .expect(200)
+          .expect(200, fixture)
           .end(done);
       });
     });
