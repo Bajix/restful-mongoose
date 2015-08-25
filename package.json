@@ -1,6 +1,6 @@
 {
   "name": "vottu",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A plugable interface for generating RESTful API's from Mongoose models",
   "main": "index.js",
   "scripts": {
