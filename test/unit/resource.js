@@ -8,6 +8,12 @@ var errorHandler = require('express-error-funnel'),
   user = fixtures.User[0],
   util = require('util');
 
+Vottu.use(function() {
+  this.on('transform', function( doc, ret ) {
+    delete ret.password;
+  });
+});
+
 var fixture = util._extend({
   __v: 0
 }, user);
@@ -120,6 +126,46 @@ describe('Resource', function() {
           .end(done);
       });
 
+      it('documents should transform', function( done ) {
+        var index = new Vottu('User').index();
+
+        index.pre('query', function() {
+          this.query.select('+updatedAt +createdAt +role');
+          this.query.sort('createdAt');
+        });
+
+        index.on('transform', function( doc, ret, options ) {
+          delete ret._id;
+          delete ret.__v;
+        });
+
+        this.app.get('/users.:format?', index.exec());
+        this.app.use(errorHandler);
+
+        this.agent.get('/users.json')
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function( err, res ) {
+            if (err) {
+              return done(err);
+            }
+
+            var data = fixtures.User.sort(function( a, b ) {
+              return Date.parse(a.createdAt) - Date.parse(b.createdAt);
+            }).slice(0, 10).map(function( user ) {
+              var fixture = util._extend({}, user);
+
+              delete fixture._id;
+              delete fixture.password;
+
+              return fixture;
+            });
+
+            assert.deepEqual(res.body, data);
+            done();
+          });
+      });
+
       it('documents should show', function( done ) {
         var index = new Vottu('User').index();
 
@@ -139,16 +185,17 @@ describe('Resource', function() {
               return done(err);
             }
 
-            var data = fixtures.User.map(function( user ) {
+            var data = fixtures.User.sort(function( a, b ) {
+              return Date.parse(a.createdAt) - Date.parse(b.createdAt);
+            }).slice(0, 10).map(function( user ) {
               var fixture = util._extend({
                 __v: 0
               }, user);
+
               delete fixture.password;
 
               return fixture;
-            }).sort(function( a, b ) {
-              return Date.parse(a.createdAt) - Date.parse(b.createdAt);
-            }).slice(0, 10);
+            });
 
             assert.deepEqual(res.body, data);
             done();
@@ -240,6 +287,32 @@ describe('Resource', function() {
         this.agent.get('/users/' + user._id)
           .expect('Content-Type', /json/)
           .expect(401)
+          .end(done);
+      });
+
+
+      it('document should transform', function( done ) {
+        var show = new Vottu('User').show();
+
+        show.pre('query', function() {
+          this.query.select('+updatedAt +createdAt +role');
+        });
+
+        show.on('transform', function( doc, ret, options ) {
+          delete ret.__v;
+          delete ret._id;
+        });
+
+        this.app.get('/users/:id.:format?', show.exec());
+        this.app.use(errorHandler);
+
+        var fixture = util._extend({}, user);
+        delete fixture.password;
+        delete fixture._id;
+
+        this.agent.get('/users/' + user._id)
+          .expect('Content-Type', /json/)
+          .expect(200, fixture)
           .end(done);
       });
 
