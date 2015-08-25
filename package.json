@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "async": "^1.4.2",
+    "expand-hash": "^0.2.1",
     "kareem": "^1.0.1",
     "node-restify-errors": "^0.1.0"
   }

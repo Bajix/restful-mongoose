@@ -6,7 +6,8 @@ var errorHandler = require('express-error-funnel'),
   Vottu = require('vottu').Vottu,
   express = require('express'),
   user = fixtures.User[0],
-  util = require('util');
+  util = require('util'),
+  url = require('url');
 
 Vottu.use(function() {
   this.on('transform', function( doc, ret ) {
@@ -89,6 +90,38 @@ describe('Resource', function() {
 
     describe('#index', function() {
       before(Factory.fill);
+
+      it('sanitizes', function( done ) {
+        var index = new Vottu('User').index(),
+          floor = new Date();
+
+        floor.setHours(0, 0, 0, 0);
+        floor.setDate(floor.getDate() - 2);
+
+        index.on('sanitize', function( req ) {
+          req.query.createdAt.$gte = floor.toISOString();
+        });
+
+        index.on('validate', function( req ) {
+          req.checkQuery('createdAt.$gte').isDate();
+        });
+
+        this.app.get('/users.:format?', index.exec());
+        this.app.use(errorHandler);
+
+        var uri = url.format({
+          pathname: '/users',
+          query: {
+            'createdAt.$gte': '2 days ago'
+          }
+        });
+
+        this.agent.get(uri)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(done);
+
+      });
 
       it('invalidates', function( done ) {
         var index = new Vottu('User').index();
