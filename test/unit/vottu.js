@@ -1,4 +1,4 @@
-var Vottu = require('vottu').Vottu;
+var Vottu = require('../../index').Vottu;
 
 describe('Vottu', function() {
   describe('Inheritance', function() {
