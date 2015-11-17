@@ -99,11 +99,11 @@ describe('Resource', function() {
         floor.setDate(floor.getDate() - 2);
 
         index.on('sanitize', function( req ) {
-          req.query.createdAt.$gte = floor.toISOString();
+          req.sanitizeQuery('published').toBoolean();
         });
 
         index.on('validate', function( req ) {
-          req.checkQuery('createdAt.$gte').isDate();
+          assert.propertyVal(req.query, 'published', false);
         });
 
         this.app.get('/users.:format?', index.exec());
@@ -112,7 +112,7 @@ describe('Resource', function() {
         var uri = url.format({
           pathname: '/users',
           query: {
-            'createdAt.$gte': '2 days ago'
+            published: 'false'
           }
         });
 
